@@ -1,3 +1,4 @@
+import CanvasStore from "./CanvasStore";
 import Vector from "./Vector";
 export * from "./Body";
-export { Vector };
+export { CanvasStore, Vector };
