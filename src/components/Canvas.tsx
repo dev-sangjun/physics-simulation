@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from "react";
-import { CanvasStore } from "../classes";
+import { CanvasStore, Rectangle, Circle } from "../classes";
 
 type CanvasProps = {
   width: number;

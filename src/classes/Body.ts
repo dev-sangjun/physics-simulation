@@ -1,43 +1,67 @@
-import Vector from "./Vector";
+export interface IBody {
+  ctx: CanvasRenderingContext2D;
+  params: RectangleParams | CircleParams;
+  draw: (params: RectangleParams | CircleParams) => void;
+}
 
-interface Body {
+type Vector = {
+  x: number;
+  y: number;
+};
+
+type BodyParams = {
   v: Vector;
   a: Vector;
-}
+};
 
-class Rectangle implements Body {
+type RectangleParams = BodyParams & {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type CircleParams = BodyParams & {
+  o: {
+    x: number;
+    y: number;
+  };
+  r: number;
+};
+
+export class Rectangle implements IBody {
+  draw: (params: RectangleParams | CircleParams) => void;
   constructor(
-    public x: number,
-    public y: number,
-    public w: number,
-    public h: number,
-    public v: Vector,
-    public a: Vector
+    public ctx: CanvasRenderingContext2D,
+    public params: RectangleParams
   ) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-    this.v = v;
-    this.a = a;
+    this.ctx = ctx;
+    this.params = params;
+    this.draw = params => {
+      const { x, y, w, h, v, a } = params as RectangleParams;
+      this.ctx.strokeStyle = "red";
+      this.ctx.beginPath();
+      this.ctx.strokeRect(x, y, w, h);
+      this.ctx.closePath();
+    };
   }
 }
 
-class Circle implements Body {
+export class Circle implements IBody {
+  draw: (params: RectangleParams | CircleParams) => void;
   constructor(
-    public o: {
-      x: number;
-      y: number;
-    },
-    public r: number,
-    public v: Vector,
-    public a: Vector
+    public ctx: CanvasRenderingContext2D,
+    public params: CircleParams
   ) {
-    this.o = o;
-    this.r = r;
-    this.v = v;
-    this.a = a;
+    this.ctx = ctx;
+    this.params = params;
+    this.draw = params => {
+      const { o, r, v, a } = params as CircleParams;
+      this.ctx.strokeStyle = "yellow";
+      this.ctx.beginPath();
+      this.ctx.arc(o.x, o.y, r, 0, 2 * Math.PI);
+      this.ctx.stroke();
+      this.ctx.closePath();
+    };
   }
 }
-
-export { Rectangle, Circle };
