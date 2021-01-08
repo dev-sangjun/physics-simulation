@@ -1,54 +1,43 @@
 import Vector from "./Vector";
 
-class Body {
+interface Body {
   v: Vector;
   a: Vector;
-  constructor(v: Vector, a: Vector) {
+}
+
+class Rectangle implements Body {
+  constructor(
+    public x: number,
+    public y: number,
+    public w: number,
+    public h: number,
+    public v: Vector,
+    public a: Vector
+  ) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
     this.v = v;
     this.a = a;
   }
 }
 
-class Rectangle extends Body {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+class Circle implements Body {
   constructor(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    v: Vector,
-    a: Vector
-  ) {
-    super(v, a);
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
-}
-
-class Circle extends Body {
-  o: {
-    x: number;
-    y: number;
-  };
-  r: number;
-  constructor(
-    o: {
+    public o: {
       x: number;
       y: number;
     },
-    r: number,
-    v: Vector,
-    a: Vector
+    public r: number,
+    public v: Vector,
+    public a: Vector
   ) {
-    super(v, a);
     this.o = o;
     this.r = r;
+    this.v = v;
+    this.a = a;
   }
 }
 
-export { Body, Rectangle, Circle };
+export { Rectangle, Circle };
