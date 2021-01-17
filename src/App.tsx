@@ -1,11 +1,11 @@
 import React from "react";
-import CanvasContainer from "./containers/CanvasContainer";
+import { BodyContainer, ToolsContainer } from "./containers";
 import "./styles/App.css";
 
 function App() {
   return (
     <div className="App">
-      <CanvasContainer />
+      <BodyContainer />
     </div>
   );
 }

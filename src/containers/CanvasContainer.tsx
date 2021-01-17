@@ -1,13 +1,14 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { CanvasStore, Rectangle, Circle } from "../classes";
-import Canvas from "../components/Canvas";
+import { Canvas } from "../components";
 import styled from "styled-components";
 
 type CanvasContainerProps = {
   className?: string;
 };
 
-const CanvasContainer = ({ className }: CanvasContainerProps) => {
+const CanvasContainer: React.FC<CanvasContainerProps> = ({ className }) => {
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const onClick = () => {
     const ctx = CanvasStore.getInstance().ctx;
@@ -35,21 +36,31 @@ const CanvasContainer = ({ className }: CanvasContainerProps) => {
       );
     }
   };
+  const onDrawGrid = () => {
+    const ctx = CanvasStore.getInstance().ctx;
+    if (ctx) {
+      CanvasStore.getInstance().addAxes();
+    }
+  };
   useLayoutEffect(() => {
     const updateWidth = () => {
-      setWidth(window.innerWidth);
+      if (!canvasContainerRef || !canvasContainerRef.current) return;
+      const canvasContainerWidth = canvasContainerRef.current.offsetWidth;
+      setWidth(canvasContainerWidth);
     };
     window.addEventListener("resize", updateWidth);
     updateWidth();
   }, []);
   return (
-    <div className={className}>
+    <div id="canvas-container" className={className} ref={canvasContainerRef}>
       <Canvas width={width} />
       <button onClick={onClick}>Draw</button>
+      <button onClick={onDrawGrid}>Grid</button>
     </div>
   );
 };
 
 export default styled(CanvasContainer)`
-  margin-top: 5rem;
+  width: 100%;
+  overflow: hidden;
 `;
