@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { act } from "react-dom/test-utils";
 import styled from "styled-components";
 import { CanvasStore, Rectangle, Circle } from "../classes";
 import CanvasContainer from "./CanvasContainer";
@@ -9,6 +10,8 @@ type BodyContainerProps = {
 };
 
 const BodyContainer: React.FC<BodyContainerProps> = ({ className }) => {
+  const [time, setTime] = useState(0);
+  const [active, setActive] = useState(false);
   const onClick = () => {
     const ctx = CanvasStore.ctx;
     if (ctx) {
@@ -38,6 +41,12 @@ const BodyContainer: React.FC<BodyContainerProps> = ({ className }) => {
   };
   const onAnimate = () => {
     CanvasStore.animate();
+    // setActive(true);
+  };
+  const onReset = () => {
+    CanvasStore.reset();
+    // setActive(false);
+    // setTime(0);
   };
   return (
     <div className={className}>
@@ -48,7 +57,9 @@ const BodyContainer: React.FC<BodyContainerProps> = ({ className }) => {
       <div className="btm-container">
         <button onClick={onClick}>Draw</button>
         <button onClick={onAnimate}>Animate</button>
+        <button onClick={onReset}>Reset</button>
       </div>
+      {/* <span className="timeer">{time}s</span> */}
     </div>
   );
 };

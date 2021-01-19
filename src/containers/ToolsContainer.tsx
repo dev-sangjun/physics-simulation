@@ -15,7 +15,7 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
         <Input placeholder="y" inputType="y" />
         <Input placeholder="width" inputType="w" />
         <Input placeholder="height" inputType="h" />
-        <Input placeholder="mass" inputType="mass" />
+        <span></span>
       </div>
     </div>
   );

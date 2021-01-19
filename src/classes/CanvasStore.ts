@@ -15,6 +15,7 @@ class CanvasStore {
   fps = 58;
   animationStarted = false;
   time = 0;
+  resetCanvas = false;
   private constructor() {}
   static getInstance(): CanvasStore {
     if (!CanvasStore.instance) CanvasStore.instance = new CanvasStore();
@@ -32,8 +33,10 @@ class CanvasStore {
   addBody(body: IBody) {
     this.bodies.push(body);
     body.draw();
+    this.resetCanvas = false;
   }
   animate() {
+    if (this.resetCanvas) return;
     if (!this.canvas || !this.ctx) return;
     if (!this.lastUpdated) {
       this.lastUpdated = performance.now();
@@ -46,6 +49,13 @@ class CanvasStore {
     requestAnimationFrame(() => this.animate());
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.bodies.forEach((body: IBody) => body.update());
+  }
+  reset() {
+    this.resetCanvas = true;
+    this.animationStarted = false;
+    if (!this.canvas || !this.ctx) return;
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.bodies = [];
   }
   private addText() {
     if (!this.axesCanvas || !this.axesCtx) return;
@@ -78,7 +88,6 @@ class CanvasStore {
     this.origin = origin;
     this.gridSize = gridSize;
 
-    console.log(gridSize);
     // Draw regular grid lines
     this.axesCtx.strokeStyle = "#a6a6a6";
     this.axesCtx.lineWidth = 1;

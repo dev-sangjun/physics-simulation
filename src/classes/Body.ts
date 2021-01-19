@@ -2,9 +2,11 @@ import CanvasStore from "./CanvasStore";
 
 export interface IBody {
   ctx: CanvasRenderingContext2D;
+  originalParams: RectangleParams | CircleParams;
   params: RectangleParams | CircleParams;
   draw: () => void;
   update: () => void;
+  reset: () => void;
 }
 
 type Vector = {
@@ -35,7 +37,7 @@ type CircleParams = BodyParams & {
 
 const GRAVITY: Vector = {
   x: 0,
-  y: -9.8,
+  y: -9.80665,
 };
 
 const calcVelocity = (v0: Vector, a: Vector, t: number): Vector => {
@@ -46,13 +48,16 @@ const calcVelocity = (v0: Vector, a: Vector, t: number): Vector => {
 };
 
 export class Rectangle implements IBody {
+  originalParams: RectangleParams;
   draw: () => void;
   update: () => void;
+  reset: () => void;
   constructor(
     public ctx: CanvasRenderingContext2D,
     public params: RectangleParams
   ) {
     this.ctx = ctx;
+    this.originalParams = params;
     this.params = params;
     this.draw = () => {
       let { x, y, w, h, m, v, a } = this.params as RectangleParams;
@@ -86,17 +91,23 @@ export class Rectangle implements IBody {
       }
       this.draw();
     };
+    this.reset = () => {
+      this.params = this.originalParams;
+    };
   }
 }
 
 export class Circle implements IBody {
+  originalParams: CircleParams;
   draw: () => void;
   update: () => void;
+  reset: () => void;
   constructor(
     public ctx: CanvasRenderingContext2D,
     public params: CircleParams
   ) {
     this.ctx = ctx;
+    this.originalParams = params;
     this.params = params;
     this.draw = () => {
       let { o, r, v, a } = this.params as CircleParams;
@@ -117,6 +128,9 @@ export class Circle implements IBody {
     this.update = () => {
       this.params.o.y -= 0.1;
       this.draw();
+    };
+    this.reset = () => {
+      this.params = this.originalParams;
     };
   }
 }
