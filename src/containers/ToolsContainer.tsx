@@ -25,7 +25,7 @@ export default styled(ToolsContainer)`
   margin-left: 1rem;
   border: 1px solid #e9e9e9;
   width: 20rem;
-  height: 720px;
+  height: 752px;
   padding: 1rem;
   .inputs-container {
     display: grid;
