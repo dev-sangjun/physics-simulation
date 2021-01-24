@@ -1,41 +1,49 @@
 import React from "react";
 import styled from "styled-components";
+import { BodyType, ParamsType } from "../classes/Body";
 import getUniqueId from "../utils/getUniqueId";
-
-type InputType =
-  | "x"
-  | "y"
-  | "w"
-  | "h"
-  | "r"
-  | "mass"
-  | "friction"
-  | "spring"
-  | "moment of inertia";
 
 type InputProps = {
   className?: string;
   placeholder?: string;
-  inputType: InputType;
+  bodyType: BodyType;
+  inputType: ParamsType;
 };
 
-const Input: React.FC<InputProps> = ({ className, placeholder, inputType }) => {
+const Input: React.FC<InputProps> = ({ className, placeholder, bodyType, inputType }) => {
   const id = getUniqueId("input");
+  const getPlaceholder = () => {
+    switch (inputType) {
+      case "x":
+      case "y":
+        return bodyType == "circle" ? `${inputType} of origin` : inputType;
+      case "w":
+        return "width";
+      case "h":
+        return "height";
+      case "r":
+        return "radius";
+      case "m":
+        return "mass";
+      default:
+        return "";
+    }
+  };
   const getLabel = () => {
     switch (inputType) {
       case "w":
       case "h":
       case "r":
         return "m";
-      case "mass":
+      case "m":
         return "kg";
       default:
-        return "";
+        return "--";
     }
   };
   return (
     <div className={className}>
-      <input id={id} placeholder={placeholder}></input>
+      <input id={id} placeholder={getPlaceholder()}></input>
       <label htmlFor={id}>{getLabel()}</label>
     </div>
   );

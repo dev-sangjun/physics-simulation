@@ -1,4 +1,4 @@
 import Canvas from "./Canvas";
 import Input from "./Input";
-
-export { Canvas, Input };
+import BodyButton from "./BodyButton";
+export { Canvas, Input, BodyButton };

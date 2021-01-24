@@ -1,5 +1,13 @@
 import CanvasStore from "./CanvasStore";
 
+export type BodyType =
+  | "rectangle"
+  | "circle"
+  | "slope"
+  | "line"
+  | "spring"
+  | "ground";
+export type ParamsType = "x" | "y" | "o" | "w" | "h" | "r" | "m" | "v" | "a";
 export interface IBody {
   ctx: CanvasRenderingContext2D;
   originalParams: RectangleParams | CircleParams;
