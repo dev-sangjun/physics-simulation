@@ -1,22 +1,29 @@
 import React from "react";
 import styled from "styled-components";
-import { BodyType, ParamsType } from "../classes/Body";
+import { BodyType, ParamType, Point, Vector } from "../classes/Body";
 import getUniqueId from "../utils/getUniqueId";
 
 type InputProps = {
   className?: string;
-  placeholder?: string;
   bodyType: BodyType;
-  inputType: ParamsType;
+  paramType: ParamType;
+  onChange: (paramType: ParamType, value: number) => void;
+  value: number;
 };
 
-const Input: React.FC<InputProps> = ({ className, placeholder, bodyType, inputType }) => {
+const Input: React.FC<InputProps> = ({
+  className,
+  bodyType,
+  paramType,
+  onChange,
+  value,
+}) => {
   const id = getUniqueId("input");
   const getPlaceholder = () => {
-    switch (inputType) {
+    switch (paramType) {
       case "x":
       case "y":
-        return bodyType == "circle" ? `${inputType} of origin` : inputType;
+        return bodyType == "circle" ? `${paramType} of origin` : paramType;
       case "w":
         return "width";
       case "h":
@@ -30,7 +37,7 @@ const Input: React.FC<InputProps> = ({ className, placeholder, bodyType, inputTy
     }
   };
   const getLabel = () => {
-    switch (inputType) {
+    switch (paramType) {
       case "w":
       case "h":
       case "r":
@@ -43,7 +50,17 @@ const Input: React.FC<InputProps> = ({ className, placeholder, bodyType, inputTy
   };
   return (
     <div className={className}>
-      <input id={id} placeholder={getPlaceholder()}></input>
+      <input
+        id={id}
+        type="number"
+        placeholder={getPlaceholder()}
+        step={0.1}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          onChange(paramType, parseFloat(e.target.value));
+        }}
+        value={value}
+        required
+      />
       <label htmlFor={id}>{getLabel()}</label>
     </div>
   );
@@ -54,7 +71,7 @@ export default styled(Input)`
   display: flex;
   input {
     width: 100%;
-    padding: 0 1.5rem 0 0.5rem;
+    padding: 0.25rem 1.5rem 0.25rem 0.5rem;
   }
   label {
     position: absolute;

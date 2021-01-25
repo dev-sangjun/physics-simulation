@@ -7,17 +7,22 @@ export type BodyType =
   | "line"
   | "spring"
   | "ground";
-export type ParamsType = "x" | "y" | "o" | "w" | "h" | "r" | "m" | "v" | "a";
+export type ParamType = "x" | "y" | "o" | "w" | "h" | "r" | "m" | "v" | "a";
 export interface IBody {
   ctx: CanvasRenderingContext2D;
   originalParams: RectangleParams | CircleParams;
   params: RectangleParams | CircleParams;
+  animating: boolean;
   draw: () => void;
   update: () => void;
   reset: () => void;
 }
+export type Point = {
+  x: number;
+  y: number;
+};
 
-type Vector = {
+export type Vector = {
   x: number;
   y: number;
 };
@@ -36,10 +41,7 @@ type RectangleParams = BodyParams & {
 };
 
 type CircleParams = BodyParams & {
-  o: {
-    x: number;
-    y: number;
-  };
+  o: Point;
   r: number;
 };
 
@@ -57,18 +59,29 @@ const calcVelocity = (v0: Vector, a: Vector, t: number): Vector => {
 
 export class Rectangle implements IBody {
   originalParams: RectangleParams;
+  params: RectangleParams;
+  animating: boolean = false;
   draw: () => void;
   update: () => void;
   reset: () => void;
   constructor(
     public ctx: CanvasRenderingContext2D,
-    public params: RectangleParams
+    params: Record<ParamType, number | Point | Vector>
   ) {
     this.ctx = ctx;
-    this.originalParams = params;
-    this.params = params;
+    const rectangleParams = {
+      x: params.x as number,
+      y: params.y as number,
+      w: params.w as number,
+      h: params.h as number,
+      m: params.m as number,
+      v: params.v as Vector,
+      a: params.a as Vector,
+    };
+    this.originalParams = JSON.parse(JSON.stringify(rectangleParams));
+    this.params = rectangleParams;
     this.draw = () => {
-      let { x, y, w, h, m, v, a } = this.params as RectangleParams;
+      let { x, y, w, h, m, v, a } = this.params;
       const { origin, gridSize } = CanvasStore;
 
       // change coordinate systems
@@ -95,30 +108,43 @@ export class Rectangle implements IBody {
           GRAVITY,
           1 / CanvasStore.fps
         );
-        CanvasStore.time += 1 / CanvasStore.fps;
+        // CanvasStore.time += 1 / CanvasStore.fps;
       }
       this.draw();
     };
     this.reset = () => {
-      this.params = this.originalParams;
+      this.params = JSON.parse(JSON.stringify(this.originalParams));
+      this.draw();
     };
   }
 }
 
 export class Circle implements IBody {
   originalParams: CircleParams;
+  params: CircleParams;
+  animating: boolean = false;
   draw: () => void;
   update: () => void;
   reset: () => void;
   constructor(
     public ctx: CanvasRenderingContext2D,
-    public params: CircleParams
+    params: Record<ParamType, number | Point | Vector>
   ) {
     this.ctx = ctx;
-    this.originalParams = params;
-    this.params = params;
+    const circleParams = {
+      o: {
+        x: params.x as number,
+        y: params.y as number,
+      },
+      r: params.r as number,
+      m: params.m as number,
+      v: params.v as Vector,
+      a: params.a as Vector,
+    };
+    this.originalParams = JSON.parse(JSON.stringify(circleParams));
+    this.params = circleParams;
     this.draw = () => {
-      let { o, r, v, a } = this.params as CircleParams;
+      let { o, r, v, a } = this.params;
       const { origin, gridSize } = CanvasStore;
 
       // change coordinate systems
@@ -134,11 +160,26 @@ export class Circle implements IBody {
       this.ctx.closePath();
     };
     this.update = () => {
-      this.params.o.y -= 0.1;
+      if (this.params.o.y - this.params.r >= 0) {
+        const offset =
+          calcVelocity(this.params.v, GRAVITY, 1 / CanvasStore.fps).y /
+          CanvasStore.fps;
+        if (this.params.o.y - this.params.r + offset > 0)
+          this.params.o.y += offset;
+        else this.params.o.y = this.params.r;
+
+        this.params.v = calcVelocity(
+          this.params.v,
+          GRAVITY,
+          1 / CanvasStore.fps
+        );
+        // CanvasStore.time += 1 / CanvasStore.fps;
+      }
       this.draw();
     };
     this.reset = () => {
-      this.params = this.originalParams;
+      this.params = JSON.parse(JSON.stringify(this.originalParams));
+      this.draw();
     };
   }
 }

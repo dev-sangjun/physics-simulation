@@ -13,9 +13,8 @@ class CanvasStore {
   gridSize = 1;
   lastUpdated?: number;
   fps = 58;
+  animating = false;
   animationStarted = false;
-  time = 0;
-  resetCanvas = false;
   private constructor() {}
   static getInstance(): CanvasStore {
     if (!CanvasStore.instance) CanvasStore.instance = new CanvasStore();
@@ -33,10 +32,16 @@ class CanvasStore {
   addBody(body: IBody) {
     this.bodies.push(body);
     body.draw();
-    this.resetCanvas = false;
   }
-  animate() {
-    if (this.resetCanvas) return;
+  draw() {
+    this.bodies.forEach((body: IBody) => body.draw());
+  }
+  animateAll() {
+    this.animating = true;
+    this.animate();
+  }
+  private animate() {
+    if (!this.animating) return;
     if (!this.canvas || !this.ctx) return;
     if (!this.lastUpdated) {
       this.lastUpdated = performance.now();
@@ -50,12 +55,23 @@ class CanvasStore {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.bodies.forEach((body: IBody) => body.update());
   }
-  reset() {
-    this.resetCanvas = true;
+  eraseAll() {
+    this.animating = false;
     this.animationStarted = false;
+    this.lastUpdated = undefined;
     if (!this.canvas || !this.ctx) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.bodies = [];
+  }
+  reset() {
+    this.animating = false;
+    this.animationStarted = false;
+    this.lastUpdated = undefined;
+    if (!this.canvas || !this.ctx) return;
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.bodies.forEach((body: IBody) => {
+      body.reset();
+    });
   }
   private addText() {
     if (!this.axesCanvas || !this.axesCtx) return;
