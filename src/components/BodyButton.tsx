@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { BodyType } from "../classes/Body";
+import { BodyType } from "../classes/utils/types";
 
 type BodyButtonProps = {
   className?: string;

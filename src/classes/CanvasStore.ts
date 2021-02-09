@@ -1,33 +1,46 @@
-import { start } from "repl";
-import { IBody, Rectangle, Circle } from "./Body";
+import { IBody } from "./Body";
+import { Rectangle, Circle } from "./bodies";
+import { colliding } from "./utils/functions";
+import { Point } from "./utils/types";
 
 class CanvasStore {
   private static instance: CanvasStore;
-  axesCanvas: HTMLCanvasElement | undefined = undefined;
-  axesCtx: CanvasRenderingContext2D | undefined = undefined;
-  canvas: HTMLCanvasElement | undefined = undefined;
-  ctx: CanvasRenderingContext2D | undefined = undefined;
+  id: number = 0;
+  canvas: HTMLCanvasElement | null = null;
+  ctx: CanvasRenderingContext2D | null = null;
+  axesCanvas: HTMLCanvasElement | null = null;
+  axesCtx: CanvasRenderingContext2D | null = null;
   bodies: Array<IBody> = [];
   hasAxes: boolean = false;
   origin = { x: 0, y: 0 };
   gridSize = 1;
-  lastUpdated?: number;
-  fps = 58;
   animating = false;
-  animationStarted = false;
+
+  // Collisions
+  collisions: boolean[] = [];
+
+  // FPS Correction
+  fps = 58;
+
   private constructor() {}
   static getInstance(): CanvasStore {
     if (!CanvasStore.instance) CanvasStore.instance = new CanvasStore();
     return CanvasStore.instance;
   }
-  setCanvas(canvas: HTMLCanvasElement, axesCanvas: HTMLCanvasElement) {
-    this.canvas = canvas;
-    this.axesCanvas = axesCanvas;
-    this.hasAxes = false;
+  getId() {
+    return this.id++;
   }
-  setContext(ctx: CanvasRenderingContext2D, axesCtx: CanvasRenderingContext2D) {
-    this.ctx = ctx;
-    this.axesCtx = axesCtx;
+  initCanvas(
+    canvas: HTMLCanvasElement,
+    axesCanvas: HTMLCanvasElement,
+    origin: Point,
+    gridSize: number
+  ) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.axesCanvas = axesCanvas;
+    this.axesCtx = axesCanvas.getContext("2d");
+    this.addAxes(origin, gridSize);
   }
   addBody(body: IBody) {
     this.bodies.push(body);
@@ -38,35 +51,34 @@ class CanvasStore {
   }
   animateAll() {
     this.animating = true;
+
+    // Initialize collisions
+    for (let i = 0; i < this.bodies.length; i++) {
+      this.collisions[i] = false;
+      this.bodies[i].animating = true;
+    }
     this.animate();
   }
   private animate() {
-    if (!this.animating) return;
     if (!this.canvas || !this.ctx) return;
-    if (!this.lastUpdated) {
-      this.lastUpdated = performance.now();
-    }
-    const dt = (performance.now() - this.lastUpdated) / 1000;
-    this.lastUpdated = performance.now();
-    if (this.animationStarted) this.fps = 1 / dt;
-    else this.animationStarted = true;
+    if (this.animating) {
+      requestAnimationFrame(() => this.animate());
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    requestAnimationFrame(() => this.animate());
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.bodies.forEach((body: IBody) => body.update());
+      for (let i = 0; i < this.bodies.length; i++) {
+        this.bodies[i].colliding = this.collisions[i];
+        this.bodies[i].update();
+      }
+    }
   }
   eraseAll() {
     this.animating = false;
-    this.animationStarted = false;
-    this.lastUpdated = undefined;
     if (!this.canvas || !this.ctx) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.bodies = [];
   }
   reset() {
     this.animating = false;
-    this.animationStarted = false;
-    this.lastUpdated = undefined;
     if (!this.canvas || !this.ctx) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.bodies.forEach((body: IBody) => {

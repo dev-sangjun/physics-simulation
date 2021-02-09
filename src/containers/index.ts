@@ -1,4 +1,3 @@
-import BodyContainer from "./BodyContainer";
-import CanvasContainer from "./CanvasContainer";
+import SimulationContainer from "./SimulationContainer";
 import ToolsContainer from "./ToolsContainer";
-export { BodyContainer, CanvasContainer, ToolsContainer };
+export { SimulationContainer, ToolsContainer };

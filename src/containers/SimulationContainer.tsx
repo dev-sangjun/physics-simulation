@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from "react";
-import { act } from "react-dom/test-utils";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { CanvasStore, Rectangle, Circle } from "../classes";
-import CanvasContainer from "./CanvasContainer";
+import { Canvas } from "../components";
 import ToolsContainer from "./ToolsContainer";
 
-type BodyContainerProps = {
+type SimulationContainerProps = {
   className?: string;
 };
 
-const BodyContainer: React.FC<BodyContainerProps> = ({ className }) => {
+const SimulationContainer: React.FC<SimulationContainerProps> = ({
+  className,
+}) => {
   const [time, setTime] = useState(0);
   const [active, setActive] = useState(false);
   return (
     <div className={className}>
       <div className="top-container">
-        <CanvasContainer />
+        <Canvas />
         <ToolsContainer />
       </div>
     </div>
   );
 };
 
-export default styled(BodyContainer)`
+export default styled(SimulationContainer)`
   display: flex;
   flex-direction: column;
   min-width: 1200px;

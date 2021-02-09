@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import { BodyType, ParamType, Point, Vector } from "../classes/Body";
-import getUniqueId from "../utils/getUniqueId";
+import { BodyType, ParamType } from "../classes/utils/types";
+import { v4 as uuidv4 } from "uuid";
 
 type InputProps = {
   className?: string;
@@ -13,65 +13,35 @@ type InputProps = {
 
 const Input: React.FC<InputProps> = ({
   className,
-  bodyType,
   paramType,
   onChange,
   value,
 }) => {
-  const id = getUniqueId("input");
-  const getPlaceholder = () => {
-    switch (paramType) {
-      case "x":
-      case "y":
-        return bodyType == "circle" ? `${paramType} of origin` : paramType;
-      case "w":
-        return "width";
-      case "h":
-        return "height";
-      case "r":
-        return "radius";
-      case "m":
-        return "mass";
-      default:
-        return "";
-    }
-  };
-  const getLabel = () => {
-    switch (paramType) {
-      case "w":
-      case "h":
-      case "r":
-        return "m";
-      case "m":
-        return "kg";
-      default:
-        return "--";
-    }
-  };
+  const id = `input-${uuidv4()}`;
   return (
     <div className={className}>
-      <input
-        id={id}
-        type="number"
-        placeholder={getPlaceholder()}
-        step={0.1}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          onChange(paramType, parseFloat(e.target.value));
-        }}
-        value={value}
-        required
-      />
-      <label htmlFor={id}>{getLabel()}</label>
+      <div className="input-container">
+        <input
+          id={id}
+          type="number"
+          step={0.1}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange(paramType, parseFloat(e.target.value));
+          }}
+          value={value}
+          required
+        />
+        <label htmlFor={id}>{paramType}</label>
+      </div>
     </div>
   );
 };
 
 export default styled(Input)`
   position: relative;
-  display: flex;
   input {
     width: 100%;
-    padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+    padding: 0.25rem 2rem 0.25rem 0.5rem;
   }
   label {
     position: absolute;
@@ -79,5 +49,7 @@ export default styled(Input)`
     right: 0.5rem;
     transform: translateY(-50%);
     font-family: sans-serif;
+    text-align: center;
+    width: 1.5rem;
   }
 `;

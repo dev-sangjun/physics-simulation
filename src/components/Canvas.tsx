@@ -1,41 +1,35 @@
 import React, { useLayoutEffect, useRef } from "react";
 import styled from "styled-components";
-import { CanvasStore, Rectangle, Circle } from "../classes";
+import { CanvasStore } from "../classes";
+import { Rectangle, Circle } from "../classes/bodies";
 
 type CanvasProps = {
   className?: string;
-  width: number;
-  height: number;
-  origin: {
-    x: number;
-    y: number;
-  };
-  gridSize: number;
 };
-
-const Canvas: React.FC<CanvasProps> = ({
-  className,
-  width,
-  height = 750,
-  origin = { x: 0, y: 0 },
-  gridSize = 25,
-}) => {
+const Canvas: React.FC<CanvasProps> = ({ className }) => {
   const axesCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const width = 750;
+  const height = 750;
+  const origin = { x: 10, y: 20 };
+  const gridSize = 25;
   useLayoutEffect(() => {
     if (
-      !axesCanvasRef ||
-      !axesCanvasRef.current ||
-      !canvasRef ||
-      !canvasRef.current
-    )
-      return;
-    CanvasStore.setCanvas(canvasRef.current, axesCanvasRef.current);
-    const ctx = canvasRef.current.getContext("2d");
-    const axesCtx = axesCanvasRef.current.getContext("2d");
-    if (axesCtx && ctx) {
-      CanvasStore.setContext(ctx, axesCtx);
-      CanvasStore.addAxes(origin, gridSize);
+      canvasRef &&
+      canvasRef.current &&
+      axesCanvasRef &&
+      axesCanvasRef.current
+    ) {
+      const ctx = canvasRef.current.getContext("2d");
+      const axesCtx = axesCanvasRef.current.getContext("2d");
+      if (ctx && axesCtx) {
+        CanvasStore.initCanvas(
+          canvasRef.current,
+          axesCanvasRef.current,
+          origin,
+          gridSize
+        );
+      }
     }
   }, [axesCanvasRef, canvasRef]);
   return (
@@ -61,6 +55,8 @@ const Canvas: React.FC<CanvasProps> = ({
 
 export default styled(Canvas)`
   position: relative;
+  width: 752px;
+  height: 752px;
   canvas {
     position: absolute;
   }
