@@ -20,16 +20,12 @@ const Canvas: React.FC<CanvasProps> = ({ className }) => {
       axesCanvasRef &&
       axesCanvasRef.current
     ) {
-      const ctx = canvasRef.current.getContext("2d");
-      const axesCtx = axesCanvasRef.current.getContext("2d");
-      if (ctx && axesCtx) {
-        CanvasStore.initCanvas(
-          canvasRef.current,
-          axesCanvasRef.current,
-          origin,
-          gridSize
-        );
-      }
+      CanvasStore.initCanvas(
+        canvasRef.current,
+        axesCanvasRef.current,
+        origin,
+        gridSize
+      );
     }
   }, [axesCanvasRef, canvasRef]);
   return (

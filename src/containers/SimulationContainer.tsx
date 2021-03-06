@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
-import { Canvas } from "../components";
+import { IBody } from "../classes";
+import { Canvas, Chart } from "../components";
 import ToolsContainer from "./ToolsContainer";
+import { RootState } from "../modules";
 
 type SimulationContainerProps = {
   className?: string;
@@ -10,14 +13,14 @@ type SimulationContainerProps = {
 const SimulationContainer: React.FC<SimulationContainerProps> = ({
   className,
 }) => {
-  const [time, setTime] = useState(0);
-  const [active, setActive] = useState(false);
+  const body = useSelector((state: RootState) => state.body);
   return (
     <div className={className}>
       <div className="top-container">
         <Canvas />
         <ToolsContainer />
       </div>
+      <div className="btm-container">{body && <Chart />}</div>
     </div>
   );
 };

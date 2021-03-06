@@ -1,3 +1,3 @@
 import CanvasStore from "./CanvasStore";
-export * from "./Body";
+export * from "./bodies/Body";
 export { CanvasStore };

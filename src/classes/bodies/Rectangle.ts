@@ -1,7 +1,7 @@
 import CanvasStore from "../CanvasStore";
-import { IBody } from "../Body";
+import { IBody } from "./Body";
 import { Point, Vector, BodyParams, ParamType } from "../utils/types";
-import { calcVelocity, calcDropVelocity } from "../utils/functions";
+import { addVector, calcVelocity, calcDropVelocity } from "../utils/functions";
 import { GRAVITY } from "../utils/constants";
 
 export type RectangleParams = BodyParams & {
@@ -17,12 +17,15 @@ export default class Rectangle implements IBody {
   ctx: CanvasRenderingContext2D;
   originalParams: RectangleParams;
   params: RectangleParams;
-  animating: boolean = false;
-  colliding: boolean = false;
-
+  color: string;
+  animating = false;
+  colliding = false;
+  applyGround = true;
+  applyGravity = true;
   constructor(
     ctx: CanvasRenderingContext2D,
-    params: Record<ParamType, number | Point | Vector>
+    params: Record<ParamType, number | Point | Vector>,
+    color: string
   ) {
     this.id = CanvasStore.getId();
     this.ctx = ctx;
@@ -36,6 +39,7 @@ export default class Rectangle implements IBody {
       a: { x: params.a_x, y: params.a_y } as Vector,
     };
     this.params = JSON.parse(JSON.stringify(this.originalParams));
+    this.color = color;
   }
   draw() {
     let { x, y, w, h } = this.params;
@@ -47,34 +51,56 @@ export default class Rectangle implements IBody {
     w *= gridSize;
     h *= -gridSize;
 
-    this.ctx.fillStyle = "red";
+    this.ctx.fillStyle = this.color;
     this.ctx.beginPath();
     this.ctx.fillRect(x, y, w, h);
     this.ctx.closePath();
   }
   update() {
     if (this.animating) {
-      const v = calcVelocity(this.params.v, GRAVITY, 1 / CanvasStore.fps);
+      const v = calcVelocity(
+        this.params.v,
+        this.applyGravity
+          ? addVector(this.originalParams.a, GRAVITY)
+          : this.originalParams.a,
+        1 / CanvasStore.fps
+      );
       const dx = v.x / CanvasStore.fps;
       const dy = v.y / CanvasStore.fps;
-      console.log(dy);
       this.params.x += dx;
-      if (this.params.y + dy > 0) this.params.y += dy;
-      else {
-        this.params.y = 0;
-        this.params.v = {
-          x: this.params.v.x,
-          y: calcDropVelocity(this.originalParams.y),
-        };
+
+      // Bounces off the ground only if applyGround === true
+      if (this.applyGround) {
+        if (this.params.y + dy > 0) this.params.y += dy;
+        else {
+          this.params.y = 0;
+          this.params.v = {
+            x: this.params.v.x,
+            y: this.applyGravity
+              ? -(
+                  calcDropVelocity(this.originalParams.y, true) +
+                  this.originalParams.v.y
+                )
+              : -this.originalParams.v.y,
+          };
+        }
+      } else {
+        this.params.y += dy;
       }
-      this.params.v = calcVelocity(this.params.v, GRAVITY, 1 / CanvasStore.fps);
+
+      this.params.v = calcVelocity(
+        this.params.v,
+        this.applyGravity
+          ? addVector(this.originalParams.a, GRAVITY)
+          : this.originalParams.a,
+        1 / CanvasStore.fps
+      );
     }
     this.draw();
   }
   reset() {
     this.animating = false;
     this.params = JSON.parse(JSON.stringify(this.originalParams));
-    console.log(this.params, CanvasStore.fps);
     this.draw();
   }
   isInBoundary(p: Point) {
