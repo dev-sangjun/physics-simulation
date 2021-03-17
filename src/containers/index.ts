@@ -1,3 +1,4 @@
 import SimulationContainer from "./SimulationContainer";
 import ToolsContainer from "./ToolsContainer";
-export { SimulationContainer, ToolsContainer };
+import CalculatorContainer from "./CalculatorContainer";
+export { SimulationContainer, ToolsContainer, CalculatorContainer };

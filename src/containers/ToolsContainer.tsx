@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import CanvasStore from "../classes/CanvasStore";
@@ -25,7 +26,7 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
     w: 0,
     h: 0,
     r: 0,
-    m: 0,
+    m: 1,
     v_x: 0,
     v_y: 0,
     a_x: 0,
@@ -79,35 +80,21 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
       [paramType]: value,
     }));
   };
-  // const testDraw = () => {
-  //   const ctx = CanvasStore.ctx;
-  //   if (ctx) {
-  //     for (let i = 0; i < 25; i += 2) {
-  //       CanvasStore.addBody(
-  //         new Rectangle(ctx, {
-  //           x: i,
-  //           y: i,
-  //           w: 1,
-  //           h: 1,
-  //           m: 0,
-  //           o: {
-  //             x: 0,
-  //             y: 0,
-  //           },
-  //           r: 0,
-  //           v_x: 0,
-  //           v_y: 0,
-  //           a_x: 0,
-  //           a_y: 0,
-  //         })
-  //       );
-  //     }
-  //   }
-  // };
   const onDraw = () => {
     const ctx = CanvasStore.ctx;
+
     if (ctx) {
       const color = colors[CanvasStore.id];
+      // for (let i = 0; i < 20; i++) {
+      //   const color = colors[CanvasStore.id];
+      //   const rect = new Rectangle(
+      //     ctx,
+      //     { ...inputs, x: i, y: i, w: 1, h: 1 },
+      //     color
+      //   );
+      //   CanvasStore.addBody(rect);
+      //   setBodies([...bodies, rect]);
+      // }
       switch (curBodyType) {
         case "rectangle":
           const rect = new Rectangle(ctx, inputs, color);
@@ -252,6 +239,17 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
           ))}
         </div>
       </div>
+      <div className="tools-container">
+        <h3 className="container-header">Other Tools</h3>
+        <ul className="links">
+          <li>
+            <Link to="/physics-simulation/calculator">Calculator</Link>
+          </li>
+          <li>
+            <Link to="/physics-simulation/calculator">Quiz</Link>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };
@@ -306,6 +304,15 @@ export default styled(ToolsContainer)`
       grid-gap: 0.5rem;
       grid-template-columns: repeat(8, 1fr);
       grid-auto-rows: 1rem;
+    }
+  }
+  .tools-container {
+    h4 {
+      font-weight: normal;
+      margin-bottom: 0.5rem;
+    }
+    .links {
+      list-style: none;
     }
   }
 `;

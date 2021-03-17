@@ -5,6 +5,7 @@ import { IBody } from "../classes";
 import { Canvas, Chart } from "../components";
 import ToolsContainer from "./ToolsContainer";
 import { RootState } from "../modules";
+import ChartContainer from "./ChartContainer";
 
 type SimulationContainerProps = {
   className?: string;
@@ -20,7 +21,7 @@ const SimulationContainer: React.FC<SimulationContainerProps> = ({
         <Canvas />
         <ToolsContainer />
       </div>
-      <div className="btm-container">{body && <Chart />}</div>
+      <div className="btm-container">{body && <ChartContainer />}</div>
     </div>
   );
 };

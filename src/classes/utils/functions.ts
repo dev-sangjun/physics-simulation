@@ -1,5 +1,5 @@
 import { IBody } from "../bodies/Body";
-import { Point, Vector, Distance } from "./types";
+import { Point, Vector } from "./types";
 import { Rectangle, Circle } from "../bodies";
 import { GRAVITY } from "./constants";
 import { Y_PLOT_COUNT } from "../../components/Chart";
@@ -21,7 +21,7 @@ export const getPos = (body: IBody, t: number): Point => {
       : true;
     const y_ =
       (1 / 2) * (a_.y * Math.pow(t_, 2)) +
-      (falling ? v.y : -calcDropVelocity(y, false)) * t_ +
+      (falling ? v.y : -calcDropVelocity(y, v.y, false)) * t_ +
       (falling ? y : 0);
     return { x: x_, y: y_ };
   } else if (body instanceof Circle) {
@@ -29,11 +29,33 @@ export const getPos = (body: IBody, t: number): Point => {
   return { x: 0, y: 0 };
 };
 
+export const getVelocity = (body: IBody, t: number): Vector => {
+  const fallTime = calcFallTime(body);
+  if (body instanceof Rectangle) {
+    const { y, v, a } = body.originalParams;
+    const a_ = body.applyGravity ? addVector(a, GRAVITY) : a;
+    const t_ = body.applyGround ? t % fallTime : t;
+    const falling = body.applyGround
+      ? Math.floor(t / fallTime) % 2 === 0
+      : true;
+    return {
+      x: v.x + a_.x * t,
+      y: falling
+        ? v.y + a_.y * t_
+        : -calcDropVelocity(y, v.y, false) + a_.y * t_,
+    };
+  } else if (body instanceof Circle) {
+  }
+  return { x: 0, y: 0 };
+};
+
 export const calcFallTime = (body: IBody) => {
   if (body instanceof Rectangle) {
-    const { y, a } = body.originalParams;
+    const { y, v, a } = body.originalParams;
+    const t_up = Math.abs(v.y / GRAVITY.y);
+    const y_up = Math.abs(v.y) * t_up + (1 / 2) * GRAVITY.y * t_up;
     return Math.sqrt(
-      (2 * y) / Math.abs(body.applyGravity ? a.y + GRAVITY.y : a.y)
+      (2 * y + y_up) / Math.abs(body.applyGravity ? a.y + GRAVITY.y : a.y)
     );
   } else if (body instanceof Circle) {
     const { o, a } = body.originalParams;
@@ -44,13 +66,50 @@ export const calcFallTime = (body: IBody) => {
   return 0;
 };
 
+export const calcAirTime = (body: IBody) => {
+  const { v } = body.originalParams;
+  const t_up = Math.abs(v.y / GRAVITY.y);
+  return (calcFallTime(body) + t_up) * 2;
+};
+
+export const getMagnitude = (v: Vector) => Math.sqrt(v.x * v.x + v.y * v.y);
+
+export const getKE = (m: number, v: Vector): number => {
+  const v_mag = getMagnitude(v);
+  return (1 / 2) * m * (v_mag * v_mag);
+};
+
+export const getPE = (m: number, h: number): number => {
+  return m * -GRAVITY.y * h;
+};
+
+export const getEnergies = (
+  body: IBody,
+  timeRange: number,
+  chartMode: "Kinetic" | "Potential"
+): number[] => {
+  let energies: number[] = [];
+  const t = calcFallTime(body);
+  const { m } = body.originalParams;
+  const period = t / Y_PLOT_COUNT;
+  for (let i = 0; i <= timeRange; i += body.applyGround ? period : 1) {
+    const velocity = getVelocity(body, i);
+    const KE = getKE(m, velocity);
+    const PE = getPE(m, getPos(body, i).y);
+    energies.push(chartMode === "Kinetic" ? KE : PE);
+  }
+  return energies;
+};
+
 export const getPositions = (
   body: IBody,
   timeRange: number,
   chartMode: "X" | "Y"
 ): number[] => {
   let positions: number[] = [];
+  const { v } = body.originalParams;
   const t = calcFallTime(body);
+  console.log("fall time", t);
   const period = t / Y_PLOT_COUNT;
   for (
     let i = 0;
@@ -78,9 +137,16 @@ export const calcMomentum = (m: number, v: Vector): Vector => ({
   y: m * v.y,
 });
 
-export const calcDropVelocity = (h: number, applyCorrection: boolean) => {
-  const t = Math.sqrt((2 * h) / -GRAVITY.y);
-  return GRAVITY.y * t * (applyCorrection ? calcVelocityCorrection(h) : 1);
+export const calcDropVelocity = (
+  h: number,
+  v_y: number,
+  applyCorrection: boolean
+) => {
+  const t_up = Math.abs(v_y / GRAVITY.y);
+  const h_ = h + Math.abs(v_y) * t_up + (1 / 2) * GRAVITY.y * Math.pow(t_up, 2);
+  const t = Math.sqrt((2 * h_) / -GRAVITY.y);
+  console.log(h_);
+  return GRAVITY.y * t * (applyCorrection ? calcVelocityCorrection(h_) : 1);
 };
 
 const calcVelocityCorrection = (y: number) => {

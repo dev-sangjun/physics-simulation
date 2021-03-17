@@ -1,6 +1,6 @@
 import CanvasStore from "../CanvasStore";
-import { IBody } from "./Body";
-import { Point, Vector, BodyParams, ParamType } from "../utils/types";
+import { BodyParams, IBody } from "./Body";
+import { Point, Vector, ParamType } from "../utils/types";
 import { addVector, calcVelocity, calcDropVelocity } from "../utils/functions";
 import { GRAVITY } from "../utils/constants";
 
@@ -77,9 +77,10 @@ export default class Rectangle implements IBody {
           this.params.v = {
             x: this.params.v.x,
             y: this.applyGravity
-              ? -(
-                  calcDropVelocity(this.originalParams.y, true) +
-                  this.originalParams.v.y
+              ? -calcDropVelocity(
+                  this.originalParams.y,
+                  this.originalParams.v.y,
+                  true
                 )
               : -this.originalParams.v.y,
           };

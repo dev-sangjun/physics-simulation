@@ -1,5 +1,7 @@
 import { RectangleParams, CircleParams } from ".";
-import { Point } from "../utils/types";
+import { Point, Vector } from "../utils/types";
+
+export type BodyParams = { v: Vector; a: Vector };
 
 export interface IBody {
   id: number;

@@ -1,12 +1,13 @@
 import CanvasStore from "../CanvasStore";
-import { IBody } from "./Body";
-import { Point, Vector, BodyParams, ParamType } from "../utils/types";
+import { BodyParams, IBody } from "./Body";
+import { Point, Vector, ParamType } from "../utils/types";
 import { calcVelocity } from "../utils/functions";
 import { GRAVITY } from "../utils/constants";
 
 export type CircleParams = BodyParams & {
   o: Point;
   r: number;
+  m: number;
 };
 
 export default class Circle implements IBody {
