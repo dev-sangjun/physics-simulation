@@ -9,15 +9,33 @@ export const addVector = (a: Vector, b: Vector): Vector => ({
   y: a.y + b.y,
 });
 
-export const getPos = (body: IBody, t: number): Point => {
+export const calcFallTime = (body: IBody) => {
+  if (body instanceof Rectangle) {
+    const { y, v, a } = body.originalParams;
+    const t_up = Math.abs(v.y / GRAVITY.y);
+    const y_up = Math.abs(v.y) * t_up + (1 / 2) * GRAVITY.y * t_up;
+    return Math.sqrt(
+      (2 * (y + y_up)) / Math.abs(body.applyGravity ? a.y + GRAVITY.y : a.y)
+    );
+  } else if (body instanceof Circle) {
+    const { o, a } = body.originalParams;
+    return Math.sqrt(
+      (2 * o.y) / Math.abs(body.applyGravity ? a.y + GRAVITY.y : a.y)
+    );
+  }
+  return 0;
+};
+
+export const calcPosition = (body: IBody, t: number): Vector => {
   const fallTime = calcFallTime(body);
   if (body instanceof Rectangle) {
     const { x, y, v, a } = body.originalParams;
     const a_ = body.applyGravity ? addVector(a, GRAVITY) : a;
     const x_ = (1 / 2) * (a_.x * Math.pow(t, 2)) + v.x * t + x;
     const t_ = body.applyGround ? t % fallTime : t;
+    const t_up = Math.abs(v.y / GRAVITY.y);
     const falling = body.applyGround
-      ? Math.floor(t / fallTime) % 2 === 0
+      ? Math.floor(t - t_up / fallTime) % 2 === 0
       : true;
     const y_ =
       (1 / 2) * (a_.y * Math.pow(t_, 2)) +
@@ -28,6 +46,21 @@ export const getPos = (body: IBody, t: number): Point => {
   }
   return { x: 0, y: 0 };
 };
+
+export const calcVelocity = (v0: Vector, a: Vector, t: number): Vector => ({
+  x: v0.x + a.x * t,
+  y: v0.y + a.y * t,
+});
+
+export const calcAcceleration = (a: Vector, t: number): Vector => ({
+  x: a.x * t,
+  y: a.y * t,
+});
+
+export const calcMomentum = (m: number, v: Vector): Vector => ({
+  x: m * v.x,
+  y: m * v.y,
+});
 
 export const getVelocity = (body: IBody, t: number): Vector => {
   const fallTime = calcFallTime(body);
@@ -47,23 +80,6 @@ export const getVelocity = (body: IBody, t: number): Vector => {
   } else if (body instanceof Circle) {
   }
   return { x: 0, y: 0 };
-};
-
-export const calcFallTime = (body: IBody) => {
-  if (body instanceof Rectangle) {
-    const { y, v, a } = body.originalParams;
-    const t_up = Math.abs(v.y / GRAVITY.y);
-    const y_up = Math.abs(v.y) * t_up + (1 / 2) * GRAVITY.y * t_up;
-    return Math.sqrt(
-      (2 * y + y_up) / Math.abs(body.applyGravity ? a.y + GRAVITY.y : a.y)
-    );
-  } else if (body instanceof Circle) {
-    const { o, a } = body.originalParams;
-    return Math.sqrt(
-      (2 * o.y) / Math.abs(body.applyGravity ? a.y + GRAVITY.y : a.y)
-    );
-  }
-  return 0;
 };
 
 export const calcAirTime = (body: IBody) => {
@@ -95,10 +111,23 @@ export const getEnergies = (
   for (let i = 0; i <= timeRange; i += body.applyGround ? period : 1) {
     const velocity = getVelocity(body, i);
     const KE = getKE(m, velocity);
-    const PE = getPE(m, getPos(body, i).y);
+    const PE = getPE(m, calcPosition(body, i).y);
     energies.push(chartMode === "Kinetic" ? KE : PE);
   }
   return energies;
+};
+
+export const getPositionData = (body: IBody, chartMode: "X" | "Y") => {
+  const data: Vector[] = [];
+  if (body instanceof Rectangle) {
+    for (let i = 0; i < 15; i += 0.01) {
+      const pos = calcPosition(body, i);
+      data.push({ x: i, y: chartMode === "X" ? pos.x : pos.y });
+    }
+    return data;
+  } else if (body instanceof Circle) {
+  }
+  return [];
 };
 
 export const getPositions = (
@@ -116,26 +145,11 @@ export const getPositions = (
     i <= timeRange;
     i += body.applyGround && chartMode === "Y" ? period : 1
   ) {
-    const { x, y } = getPos(body, i);
+    const { x, y } = calcPosition(body, i);
     positions.push(chartMode === "X" ? x : y);
   }
   return positions;
 };
-
-export const calcVelocity = (v0: Vector, a: Vector, t: number): Vector => ({
-  x: v0.x + a.x * t,
-  y: v0.y + a.y * t,
-});
-
-export const calcAcceleration = (a: Vector, t: number): Vector => ({
-  x: a.x * t,
-  y: a.y * t,
-});
-
-export const calcMomentum = (m: number, v: Vector): Vector => ({
-  x: m * v.x,
-  y: m * v.y,
-});
 
 export const calcDropVelocity = (
   h: number,

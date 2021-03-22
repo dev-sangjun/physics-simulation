@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { Line } from "react-chartjs-2";
+import { Line, Scatter } from "react-chartjs-2";
 import { RootState } from "../modules";
 import { IBody } from "../classes";
 import { Point } from "../classes/utils/types";
-import { calcFallTime, getPositions } from "../classes/utils/functions";
+import { calcFallTime, getPositionData } from "../classes/utils/functions";
 import { Circle, Rectangle } from "../classes/bodies";
 
 type ChartProps = {
@@ -13,12 +13,15 @@ type ChartProps = {
 };
 
 type ChartDataType = {
-  labels: string[];
   datasets: [
     {
       label: string;
-      data: number[];
+      data: Array<{
+        x: number;
+        y: number;
+      }>;
       fill: boolean;
+      showLine: boolean;
       backgroundColor: string;
       borderColor: string;
       borderWidth: number;
@@ -48,21 +51,18 @@ const Chart: React.FC<ChartProps> = ({ className }) => {
     }
     return labels;
   };
-  const data = () => {
-    const data = getPositions(body, timeRange, chartMode);
-    return data;
-  };
+  const data = () => {};
   const chart = () => {
     setChartData({
-      labels: labels(),
       datasets: [
         {
           label: `Position ${chartMode}`,
-          data: data(),
+          data: getPositionData(body, chartMode),
           fill: false,
+          showLine: true,
           backgroundColor: body.color,
           borderColor: body.color,
-          borderWidth: 4,
+          borderWidth: 1,
         },
       ],
     });
@@ -75,7 +75,7 @@ const Chart: React.FC<ChartProps> = ({ className }) => {
   }, [body, chartMode]);
   return (
     <div className={className}>
-      {chartData && <Line data={chartData} />}
+      {chartData && <Scatter data={chartData} />}
       {chartData && (
         <button className="chart-mode-btn" onClick={onClick}>
           Plot {chartMode === "X" ? "Y" : "X"}
