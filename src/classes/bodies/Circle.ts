@@ -1,7 +1,7 @@
 import CanvasStore from "../CanvasStore";
 import { BodyParams, IBody } from "./Body";
 import { Point, Vector, ParamType } from "../utils/types";
-import { calcVelocity } from "../utils/functions";
+import { calcVelocity, getVelocity } from "../utils/functions";
 import { GRAVITY } from "../utils/constants";
 
 export type CircleParams = BodyParams & {
@@ -60,13 +60,13 @@ export default class Circle implements IBody {
   update() {
     if (this.params.o.y - this.params.r >= 0) {
       const offset =
-        calcVelocity(this.params.v, this.originalParams.a, 1 / CanvasStore.fps)
+        getVelocity(this.params.v, this.originalParams.a, 1 / CanvasStore.fps)
           .y / CanvasStore.fps;
       if (this.params.o.y - this.params.r + offset > 0)
         this.params.o.y += offset;
       else this.params.o.y = this.params.r;
 
-      this.params.v = calcVelocity(this.params.v, GRAVITY, 1 / CanvasStore.fps);
+      this.params.v = getVelocity(this.params.v, GRAVITY, 1 / CanvasStore.fps);
       // CanvasStore.time += 1 / CanvasStore.fps;
     }
     this.draw();

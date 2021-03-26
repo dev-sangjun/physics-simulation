@@ -16,10 +16,7 @@ type ChartDataType = {
   datasets: [
     {
       label: string;
-      data: Array<{
-        x: number;
-        y: number;
-      }>;
+      data: Array<{ x: number; y: number }>;
       fill: boolean;
       showLine: boolean;
       backgroundColor: string;
@@ -36,22 +33,6 @@ const Chart: React.FC<ChartProps> = ({ className }) => {
   const body: IBody = useSelector((state: RootState) => state.body);
   const [chartData, setChartData] = useState<ChartDataType>();
   const [chartMode, setChartMode] = useState<ChartMode>("X");
-  const timeRange = 10;
-  const labels = () => {
-    let labels: string[] = [];
-    const t = calcFallTime(body);
-    const period = t / Y_PLOT_COUNT;
-    for (
-      let i = 0;
-      i <= timeRange;
-      i += body.applyGround && chartMode === "Y" ? period : 1
-    ) {
-      const num = chartMode === "Y" ? Math.round(i * 1000) / 1000 : i;
-      labels.push(String(num));
-    }
-    return labels;
-  };
-  const data = () => {};
   const chart = () => {
     setChartData({
       datasets: [

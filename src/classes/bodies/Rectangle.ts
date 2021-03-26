@@ -1,7 +1,7 @@
 import CanvasStore from "../CanvasStore";
 import { BodyParams, IBody } from "./Body";
 import { Point, Vector, ParamType } from "../utils/types";
-import { addVector, calcVelocity, calcDropVelocity } from "../utils/functions";
+import { addVector, getVelocity, calcDropVelocity } from "../utils/functions";
 import { GRAVITY } from "../utils/constants";
 
 export type RectangleParams = BodyParams & {
@@ -58,7 +58,7 @@ export default class Rectangle implements IBody {
   }
   update() {
     if (this.animating) {
-      const v = calcVelocity(
+      const v = getVelocity(
         this.params.v,
         this.applyGravity
           ? addVector(this.originalParams.a, GRAVITY)
@@ -89,7 +89,7 @@ export default class Rectangle implements IBody {
         this.params.y += dy;
       }
 
-      this.params.v = calcVelocity(
+      this.params.v = getVelocity(
         this.params.v,
         this.applyGravity
           ? addVector(this.originalParams.a, GRAVITY)
