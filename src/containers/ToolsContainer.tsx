@@ -13,25 +13,27 @@ type ToolsContainerProps = {
   className?: string;
 };
 
+const inputsInitialState = {
+  x: 0,
+  y: 0,
+  o: {
+    x: 0,
+    y: 0,
+  },
+  w: 0,
+  h: 0,
+  r: 0,
+  m: 1,
+  v_x: 0,
+  v_y: 0,
+  a_x: 0,
+  a_y: 0,
+};
+
 const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
   const [curBodyType, setCurBodyType] = useState<BodyType>("rectangle");
   const [animating, setAnimating] = useState(false);
-  const inputsInitialState = {
-    x: 0,
-    y: 0,
-    o: {
-      x: 0,
-      y: 0,
-    },
-    w: 0,
-    h: 0,
-    r: 0,
-    m: 1,
-    v_x: 0,
-    v_y: 0,
-    a_x: 0,
-    a_y: 0,
-  };
+
   const [inputs, setInputs] = useState<
     Record<ParamType, number | Point | Vector>
   >(inputsInitialState);
@@ -243,10 +245,10 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
         <h3 className="container-header">Other Tools</h3>
         <ul className="links">
           <li>
-            <Link to="/physics-simulation/calculator">Calculator</Link>
+            <Link to="/calculator">Calculator</Link>
           </li>
           <li>
-            <Link to="/physics-simulation/calculator">Quiz</Link>
+            <Link to="/quiz">Quiz</Link>
           </li>
         </ul>
       </div>

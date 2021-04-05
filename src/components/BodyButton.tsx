@@ -13,7 +13,6 @@ const BodyButton: React.FC<BodyButtonProps> = ({
   className,
   bodyType,
   onClick,
-  selected,
 }) => {
   return (
     <button

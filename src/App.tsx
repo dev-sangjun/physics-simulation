@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import { SimulationContainer } from "./containers";
 import CalculatorContainer from "./containers/CalculatorContainer";
 import "./styles/App.css";
@@ -9,10 +9,10 @@ function App() {
     <div className="App">
       <Router>
         <Switch>
-          <Route path="/physics-simulation/calculator">
+          <Route path="/calculator">
             <CalculatorContainer />
           </Route>
-          <Route exact path="/physics-simulation">
+          <Route exact path="/">
             <SimulationContainer />
           </Route>
         </Switch>

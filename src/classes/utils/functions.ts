@@ -14,13 +14,19 @@ export const calcFallTime = (body: IBody) => {
   if (body instanceof Rectangle) {
     const { y, v, a } = body.originalParams;
     const a_ = body.applyGravity ? a.y + GRAVITY.y : a.y;
-    const t_up = Math.abs(v.y / GRAVITY.y);
-    const y_up = Math.abs(v.y) * t_up + (1 / 2) * GRAVITY.y * (t_up * t_up);
-    if (v.y !== 0) {
-      const d = y + y_up;
+    const t_ = v.y > 0 ? Math.abs(v.y / GRAVITY.y) : 0;
+    const y_ =
+      v.y > 0 ? Math.abs(v.y) * t_ + (1 / 2) * GRAVITY.y * (t_ * t_) : 0;
+    if (v.y > 0) {
+      const d = y + y_;
       return Math.sqrt(Math.abs((2 * d) / a_));
+    } else if (v.y < 0) {
+      const t = (v.y - Math.sqrt(v.y * v.y - 2 * GRAVITY.y * y)) / GRAVITY.y;
+      return t;
+    } else {
+      const t = Math.sqrt(-2 * GRAVITY.y * y) / GRAVITY.y;
+      return t;
     }
-    return Math.sqrt(Math.abs((2 * y) / a_));
   } else if (body instanceof Circle) {
     const { o, a } = body.originalParams;
     return Math.sqrt(
@@ -36,15 +42,20 @@ export const calcPosition = (body: IBody, t: number): Vector => {
     const { x, y, v, a } = body.originalParams;
     const a_ = body.applyGravity ? addVector(a, GRAVITY) : a;
     const x_ = (1 / 2) * (a_.x * Math.pow(t, 2)) + v.x * t + x;
-    const t_up = Math.abs(v.y / GRAVITY.y);
-    const y_up = Math.abs(v.y) * t_up + (1 / 2) * GRAVITY.y * (t_up * t_up);
+    const t_up = v.y > 0 ? Math.abs(v.y / GRAVITY.y) : 0;
+    const y_up =
+      v.y > 0 ? Math.abs(v.y) * t_up + (1 / 2) * GRAVITY.y * (t_up * t_up) : 0;
     const t_ = body.applyGround ? (t - t_up) % fallTime : t;
     let falling = true;
     if (body.applyGround) {
-      if (t < t_up) falling = false;
-      else falling = Math.floor((t - t_up) / fallTime) % 2 == 0;
+      if (v.y > 0) {
+        if (t < t_up) falling = false;
+        else falling = Math.floor((t - t_up) / fallTime) % 2 == 0;
+      } else {
+        falling = Math.floor(t / fallTime) % 2 == 0;
+      }
     }
-    if (body.applyGround && t < t_up) {
+    if (body.applyGround && t < t_up && v.y > 0) {
       const y_ = v.y * t + (1 / 2) * a_.y * (t * t) + y;
       return { x: x_, y: y_ };
     } else if (falling) {
