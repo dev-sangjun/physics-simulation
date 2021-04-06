@@ -3,6 +3,7 @@ import { Point, Vector } from "./types";
 import { Rectangle, Circle } from "../bodies";
 import { GRAVITY } from "./constants";
 import { Y_PLOT_COUNT } from "../../components/Chart";
+import { off } from "process";
 
 export const addVector = (a: Vector, b: Vector): Vector => ({
   x: a.x + b.x,
@@ -17,14 +18,11 @@ export const calcFallTime = (body: IBody) => {
     const t_ = v.y > 0 ? Math.abs(v.y / GRAVITY.y) : 0;
     const y_ =
       v.y > 0 ? Math.abs(v.y) * t_ + (1 / 2) * GRAVITY.y * (t_ * t_) : 0;
-    if (v.y > 0) {
+    if (v.y !== 0) {
       const d = y + y_;
       return Math.sqrt(Math.abs((2 * d) / a_));
-    } else if (v.y < 0) {
-      const t = (v.y - Math.sqrt(v.y * v.y - 2 * GRAVITY.y * y)) / GRAVITY.y;
-      return t;
     } else {
-      const t = Math.sqrt(-2 * GRAVITY.y * y) / GRAVITY.y;
+      const t = Math.abs(Math.sqrt(-2 * GRAVITY.y * y) / GRAVITY.y);
       return t;
     }
   } else if (body instanceof Circle) {
@@ -36,30 +34,86 @@ export const calcFallTime = (body: IBody) => {
   return 0;
 };
 
+const calcTimeOffset = (v_y: number, y: number) => {
+  if (v_y > 0) {
+    return v_y / GRAVITY.y;
+  } else if (v_y < 0) {
+    const t = Math.sqrt((-2 * y) / GRAVITY.y);
+    const t_ = (-v_y - Math.sqrt(v_y * v_y - 2 * GRAVITY.y * y)) / GRAVITY.y;
+    const offset = Math.abs(t - t_);
+    return offset;
+  } else {
+    return 0;
+  }
+};
+
+const isFalling = (
+  y: number,
+  v_y: number,
+  fallTime: number,
+  t: number,
+  t_offset: number
+) => {
+  if (v_y > 0) {
+    return t < Math.abs(t_offset)
+      ? false
+      : Math.floor((t + t_offset) / fallTime) % 2 === 0;
+  } else if (v_y < 0) {
+    // Fall time in phase 0
+    return t < t_offset
+      ? true
+      : Math.floor((t + t_offset) / fallTime) % 2 === 0;
+  } else {
+    return Math.floor(t / fallTime) % 2 === 0;
+  }
+};
+
+// const y_up =
+// v.y > 0 ? Math.abs(v.y) * t_up + (1 / 2) * GRAVITY.y * (t_up * t_up) : 0;
+
 export const calcPosition = (body: IBody, t: number): Vector => {
   const fallTime = calcFallTime(body);
   if (body instanceof Rectangle) {
     const { x, y, v, a } = body.originalParams;
     const a_ = body.applyGravity ? addVector(a, GRAVITY) : a;
     const x_ = (1 / 2) * (a_.x * Math.pow(t, 2)) + v.x * t + x;
-    const t_up = v.y > 0 ? Math.abs(v.y / GRAVITY.y) : 0;
-    const y_up =
-      v.y > 0 ? Math.abs(v.y) * t_up + (1 / 2) * GRAVITY.y * (t_up * t_up) : 0;
-    const t_ = body.applyGround ? (t - t_up) % fallTime : t;
-    let falling = true;
-    if (body.applyGround) {
-      if (v.y > 0) {
-        if (t < t_up) falling = false;
-        else falling = Math.floor((t - t_up) / fallTime) % 2 == 0;
-      } else {
-        falling = Math.floor(t / fallTime) % 2 == 0;
-      }
-    }
-    if (body.applyGround && t < t_up && v.y > 0) {
+    const t_offset = calcTimeOffset(v.y, y);
+    const t_ = body.applyGround ? (t + t_offset) % fallTime : t;
+    const falling = body.applyGround
+      ? isFalling(y, v.y, fallTime, t, t_offset)
+      : true;
+    if (v.y > 0 && t < Math.abs(t_offset)) {
       const y_ = v.y * t + (1 / 2) * a_.y * (t * t) + y;
       return { x: x_, y: y_ };
-    } else if (falling) {
+    } else if (v.y > 0 && falling) {
+      const offset = Math.abs(t_offset);
+      const y_up =
+        Math.abs(v.y) * offset + (1 / 2) * GRAVITY.y * (offset * offset);
       const y_ = (1 / 2) * a_.y * (t_ * t_) + y + y_up;
+      return { x: x_, y: y_ };
+    } else if (v.y < 0) {
+      if (falling) {
+        const fallTime_ = Math.abs(
+          (-v.y + Math.sqrt(v.y * v.y - 2 * GRAVITY.y * y)) / GRAVITY.y
+        );
+        if (t < fallTime_) {
+          const y_ = v.y * t + (1 / 2) * a_.y * (t * t) + y;
+          return { x: x_, y: y_ };
+        } else {
+          const y_up =
+            Math.abs(v.y) * t_offset +
+            (1 / 2) * GRAVITY.y * (t_offset * t_offset);
+          const y_ = (1 / 2) * a_.y * (t_ * t_) + y + y_up;
+          return { x: x_, y: y_ };
+        }
+      } else {
+        // not falling
+        const y_ =
+          -calcDropVelocity(y, v.y, false) * t_ + (1 / 2) * a_.y * (t_ * t_);
+        return { x: x_, y: y_ };
+      }
+    } else if (falling) {
+      const y_ = v.y * t_ + (1 / 2) * a_.y * (t_ * t_) + y;
       return { x: x_, y: y_ };
     } else {
       const y_ =
@@ -89,14 +143,13 @@ export const calcVelocity = (body: IBody, t: number): Vector => {
   if (body instanceof Rectangle) {
     const { y, v, a } = body.originalParams;
     const a_ = body.applyGravity ? addVector(a, GRAVITY) : a;
-    const t_up = Math.abs(v.y / GRAVITY.y);
-    const t_ = body.applyGround ? (t - t_up) % fallTime : t;
-    let falling = true;
-    if (body.applyGround) {
-      if (t < t_up) falling = false;
-      else falling = Math.floor((t - t_up) / fallTime) % 2 == 0;
-    }
-    if (t < t_up) return { x: v.x + a_.x * t, y: v.y + a_.y * t };
+    const t_offset = calcTimeOffset(v.y, y);
+    const t_ = body.applyGround ? (t + t_offset) % fallTime : t;
+    const falling = body.applyGround
+      ? isFalling(y, v.y, fallTime, t, t_offset)
+      : true;
+    if ((v.y > 0 && t < Math.abs(t_offset)) || (v.y < 0 && t < t_offset))
+      return { x: v.x + a_.x * t, y: v.y + a_.y * t };
     else if (falling) {
       return { x: v.x + a_.x * t, y: a_.y * t_ };
     } else
