@@ -1,5 +1,18 @@
+@import "./fonts.css";
 * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  font-family: "Roboto", sans-serif;
+  color: #2d3436;
+}
+
+.App {
+  background-color: #dfe6e9;
+  min-height: 100vh;
+}
+
+nav,
+section {
+  max-width: 1200px;
 }

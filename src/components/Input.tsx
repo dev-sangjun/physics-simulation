@@ -1,11 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import { BodyType, ParamType } from "../classes/utils/types";
+import { ParamType } from "../classes/utils/types";
 import { v4 as uuidv4 } from "uuid";
 
 type InputProps = {
   className?: string;
-  bodyType: BodyType;
   paramType: ParamType;
   onChange: (paramType: ParamType, value: number) => void;
   value: number;
@@ -41,7 +40,9 @@ export default styled(Input)`
   position: relative;
   input {
     width: 100%;
-    padding: 0.25rem 2rem 0.25rem 0.5rem;
+    padding: 0.5rem 2rem 0.5rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #2d3436;
   }
   label {
     position: absolute;

@@ -1,6 +1,5 @@
 import { IBody } from "../bodies";
 import { addAxes } from "./functions";
-import { Rectangle, Circle } from "../bodies";
 import { Point } from "../utils/types";
 
 class CanvasStore {

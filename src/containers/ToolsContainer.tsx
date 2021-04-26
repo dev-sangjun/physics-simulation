@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import CanvasStore from "../classes/CanvasStore";
-import { Input, BodyButton, KeyButton } from "../components";
-import { BodyType, ParamType, Point, Vector } from "../classes/utils/types";
-import { IBody, Rectangle, Circle } from "../classes/bodies";
+import { Input, KeyButton } from "../components";
+import { ParamType, Point, Vector } from "../classes/utils/types";
+import { IBody, Rectangle } from "../classes/bodies";
 import { colors } from "../utils/colors";
 import { removeBody } from "../modules/body";
 
@@ -16,13 +16,8 @@ type ToolsContainerProps = {
 const inputsInitialState = {
   x: 0,
   y: 0,
-  o: {
-    x: 0,
-    y: 0,
-  },
   w: 0,
   h: 0,
-  r: 0,
   m: 1,
   v_x: 0,
   v_y: 0,
@@ -31,53 +26,20 @@ const inputsInitialState = {
 };
 
 const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
-  const [curBodyType, setCurBodyType] = useState<BodyType>("rectangle");
   const [animating, setAnimating] = useState(false);
-
-  const [inputs, setInputs] = useState<
-    Record<ParamType, number | Point | Vector>
-  >(inputsInitialState);
+  const [inputs, setInputs] = useState<Record<ParamType, number>>(
+    inputsInitialState
+  );
   const [bodies, setBodies] = useState<IBody[]>([]);
   const [applyGround, setApplyGround] = useState(true);
   const [applyGravity, setApplyGravity] = useState(true);
   const dispatch = useDispatch();
-  const bodyTypes: BodyType[] = [
-    "rectangle",
-    "circle",
-    "slope",
-    "line",
-    "spring",
-    "ground",
-  ];
-  const coordinates: Record<BodyType, ParamType[]> = {
-    rectangle: ["x", "y", "w", "h"],
-    circle: ["x", "y", "r"],
-    slope: [],
-    line: [],
-    spring: [],
-    ground: [],
-  };
-  const constants: Record<BodyType, ParamType[]> = {
-    rectangle: ["m"],
-    circle: ["m"],
-    slope: [],
-    line: [],
-    spring: [],
-    ground: [],
-  };
-  const vectors: Record<BodyType, ParamType[]> = {
-    rectangle: ["v_x", "v_y", "a_x", "a_y"],
-    circle: ["v_x", "v_y", "a_x", "a_y"],
-    slope: [],
-    line: [],
-    spring: [],
-    ground: [],
-  };
-  const onClick = (bodyType: BodyType) => {
-    setCurBodyType(bodyType);
-  };
+  const coordinates: ParamType[] = ["x", "y", "w", "h"];
+  const constants: ParamType[] = ["m"];
+  const vectors: ParamType[] = ["v_x", "v_y", "a_x"];
+
   const onChange = (paramType: ParamType, value: number) => {
-    setInputs((inputs: Record<ParamType, number | Point | Vector>) => ({
+    setInputs((inputs: Record<ParamType, number>) => ({
       ...inputs,
       [paramType]: value,
     }));
@@ -87,36 +49,14 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
 
     if (ctx) {
       const color = colors[CanvasStore.id];
-      // for (let i = 0; i < 20; i++) {
-      //   const color = colors[CanvasStore.id];
-      //   const rect = new Rectangle(
-      //     ctx,
-      //     { ...inputs, x: i, y: i, w: 1, h: 1 },
-      //     color
-      //   );
-      //   CanvasStore.addBody(rect);
-      //   setBodies([...bodies, rect]);
-      // }
-      switch (curBodyType) {
-        case "rectangle":
-          const rect = new Rectangle(ctx, inputs, color);
-          CanvasStore.addBody(rect);
-          setBodies([...bodies, rect]);
-          break;
-        case "circle":
-          const circle = new Circle(ctx, inputs, color);
-          CanvasStore.addBody(circle);
-          setBodies([...bodies, circle]);
-          break;
-        default:
-          break;
-      }
+      const rect = new Rectangle(ctx, inputs, color);
+      CanvasStore.addBody(rect);
+      setBodies([...bodies, rect]);
     }
   };
   const onAnimate = () => {
     CanvasStore.animateAll();
     setAnimating(true);
-    // setActive(true);
   };
   const onEraseAll = () => {
     CanvasStore.eraseAll();
@@ -139,59 +79,43 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
   useEffect(() => {}, []);
   return (
     <div className={className}>
-      <div className="buttons-container grid">
-        {bodyTypes.map((bodyType: BodyType, index: number) => (
-          <BodyButton
-            key={index}
-            bodyType={bodyType}
-            onClick={onClick}
-            selected={curBodyType === bodyType ? true : false}
-          />
-        ))}
-      </div>
       <div>
         <h3 className="container-header">Coordinates</h3>
         <div className="inputs-container grid">
-          {coordinates[curBodyType] &&
-            coordinates[curBodyType].map((param: ParamType, index: number) => (
-              <Input
-                key={index}
-                bodyType={curBodyType}
-                paramType={param}
-                onChange={onChange}
-                value={inputs[param] as number}
-              />
-            ))}
+          {coordinates.map((paramType: ParamType, index: number) => (
+            <Input
+              paramType={paramType}
+              onChange={onChange}
+              value={inputs[paramType]}
+              key={index}
+            />
+          ))}
         </div>
       </div>
       <div>
         <h3 className="container-header">Constants</h3>
         <div className="inputs-container grid">
-          {constants[curBodyType] &&
-            constants[curBodyType].map((param: ParamType, index: number) => (
-              <Input
-                key={index}
-                bodyType={curBodyType}
-                paramType={param}
-                onChange={onChange}
-                value={inputs[param] as number}
-              />
-            ))}
+          {constants.map((paramType: ParamType, index: number) => (
+            <Input
+              paramType={paramType}
+              onChange={onChange}
+              value={inputs[paramType]}
+              key={index}
+            />
+          ))}
         </div>
       </div>
       <div>
         <h3 className="container-header">Vectors</h3>
         <div className="inputs-container grid">
-          {vectors[curBodyType] &&
-            vectors[curBodyType].map((param: ParamType, index: number) => (
-              <Input
-                key={index}
-                bodyType={curBodyType}
-                paramType={param}
-                onChange={onChange}
-                value={inputs[param] as number}
-              />
-            ))}
+          {vectors.map((paramType: ParamType, index: number) => (
+            <Input
+              paramType={paramType}
+              onChange={onChange}
+              value={inputs[paramType]}
+              key={index}
+            />
+          ))}
         </div>
       </div>
       <div className="actions-container grid">
@@ -243,25 +167,18 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
       </div>
       <div className="tools-container">
         <h3 className="container-header">Other Tools</h3>
-        <ul className="links">
-          <li>
-            <Link to="/calculator">Calculator</Link>
-          </li>
-          <li>
-            <Link to="/quiz">Quiz</Link>
-          </li>
-        </ul>
       </div>
     </div>
   );
 };
 
 export default styled(ToolsContainer)`
+  background-color: white;
+  border-radius: 12px;
   margin-left: 1rem;
-  border: 1px solid #e9e9e9;
   width: 20rem;
-  height: 752px;
-  padding: 1rem;
+  height: calc(752px + 4rem);
+  padding: 2rem;
   .grid {
     display: grid;
     grid-gap: 0.5rem;

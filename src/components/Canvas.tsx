@@ -1,7 +1,6 @@
 import React, { useLayoutEffect, useRef } from "react";
 import styled from "styled-components";
 import { CanvasStore } from "../classes";
-import { Rectangle, Circle } from "../classes/bodies";
 
 type CanvasProps = {
   className?: string;
@@ -51,8 +50,12 @@ const Canvas: React.FC<CanvasProps> = ({ className }) => {
 
 export default styled(Canvas)`
   position: relative;
-  width: 752px;
-  height: 752px;
+  width: calc(752px + 4rem);
+  height: calc(752px + 4rem);
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+
   canvas {
     position: absolute;
   }

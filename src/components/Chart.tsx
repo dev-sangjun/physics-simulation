@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { Line, Scatter } from "react-chartjs-2";
+import { Scatter } from "react-chartjs-2";
 import { RootState } from "../modules";
 import { IBody } from "../classes";
-import { Point } from "../classes/utils/types";
 import { calcFallTime, getPositionData } from "../classes/utils/functions";
-import { Circle, Rectangle } from "../classes/bodies";
 
 type ChartProps = {
   className?: string;

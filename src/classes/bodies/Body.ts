@@ -1,4 +1,4 @@
-import { RectangleParams, CircleParams } from ".";
+import { RectangleParams } from "./Rectangle";
 import { Point, Vector } from "../utils/types";
 
 export type BodyParams = { v: Vector; a: Vector };
@@ -6,8 +6,8 @@ export type BodyParams = { v: Vector; a: Vector };
 export interface IBody {
   id: number;
   ctx: CanvasRenderingContext2D;
-  originalParams: RectangleParams | CircleParams;
-  params: RectangleParams | CircleParams;
+  originalParams: RectangleParams;
+  params: RectangleParams;
   color: string;
   animating: boolean;
   colliding: boolean;
