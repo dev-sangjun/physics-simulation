@@ -151,9 +151,6 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
           ))}
         </div>
       </div>
-      <div className="tools-container">
-        <h3 className="container-header">Other Tools</h3>
-      </div>
     </div>
   );
 };

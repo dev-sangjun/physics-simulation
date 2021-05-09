@@ -53,7 +53,6 @@ const Input: React.FC<InputProps> = ({ className, inputType, onChange }) => {
             type="text"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               if (!isNaN(parseFloat(e.target.value))) {
-                console.log(e.target.value);
                 onChange(inputType, parseFloat(e.target.value));
               }
               setVal(e.target.value);
