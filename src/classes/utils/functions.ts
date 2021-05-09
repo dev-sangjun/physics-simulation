@@ -16,9 +16,11 @@ export const calcFallTime = (body: IBody) => {
     const t_ = v.y > 0 ? Math.abs(v.y / GRAVITY.y) : 0;
     const y_ =
       v.y > 0 ? Math.abs(v.y) * t_ + (1 / 2) * GRAVITY.y * (t_ * t_) : 0;
-    if (v.y !== 0) {
+    if (v.y > 0) {
       const d = y + y_;
       return Math.sqrt(Math.abs((2 * d) / a_));
+    } else if (v.y < 0) {
+      return calcDropVelocity(y, v.y, false) / GRAVITY.y;
     } else {
       const t = Math.abs(Math.sqrt(-2 * GRAVITY.y * y) / GRAVITY.y);
       return t;
@@ -31,10 +33,8 @@ const calcTimeOffset = (v_y: number, y: number) => {
   if (v_y > 0) {
     return v_y / GRAVITY.y;
   } else if (v_y < 0) {
-    const t = Math.sqrt((-2 * y) / GRAVITY.y);
     const t_ = (-v_y - Math.sqrt(v_y * v_y - 2 * GRAVITY.y * y)) / GRAVITY.y;
-    const offset = Math.abs(t - t_);
-    return offset;
+    return t_;
   } else {
     return 0;
   }
@@ -54,7 +54,7 @@ const isFalling = (
     // Fall time in phase 0
     return t < t_offset
       ? true
-      : Math.floor((t + t_offset) / fallTime) % 2 === 0;
+      : Math.floor((t - t_offset) / fallTime) % 2 !== 0;
   } else {
     return Math.floor(t / fallTime) % 2 === 0;
   }
@@ -77,10 +77,10 @@ export const calcPosition = (body: IBody, t: number): Vector => {
         return { x: x_, y: y_ };
       }
       if (falling) {
-        const offset = Math.abs(t_offset);
-        const y_up =
-          Math.abs(v.y) * offset + (1 / 2) * GRAVITY.y * (offset * offset);
-        const y_ = (1 / 2) * a_.y * (t_ * t_) + y + y_up;
+        const y__ =
+          -calcDropVelocity(y, v.y, false) * fallTime +
+          (1 / 2) * GRAVITY.y * (fallTime * fallTime);
+        const y_ = (1 / 2) * a_.y * (t_ * t_) + y__;
         return { x: x_, y: y_ };
       } else {
         const y_ =
@@ -88,22 +88,21 @@ export const calcPosition = (body: IBody, t: number): Vector => {
         return { x: x_, y: y_ };
       }
     } else if (v.y < 0) {
-      const fallTime_ = Math.abs(
-        (-v.y + Math.sqrt(v.y * v.y - 2 * GRAVITY.y * y)) / GRAVITY.y
-      );
-      if (t < fallTime_) {
+      if (t < t_offset) {
         const y_ = v.y * t + (1 / 2) * a_.y * (t * t) + y;
         return { x: x_, y: y_ };
       }
       if (falling) {
-        const y_up =
-          Math.abs(v.y) * t_offset +
-          (1 / 2) * GRAVITY.y * (t_offset * t_offset);
-        const y_ = (1 / 2) * a_.y * (t_ * t_) + y + y_up;
+        const t__ = (t - t_offset) % fallTime;
+        const y__ =
+          -calcDropVelocity(y, v.y, false) * fallTime +
+          (1 / 2) * GRAVITY.y * (fallTime * fallTime);
+        const y_ = (1 / 2) * a_.y * (t__ * t__) + y__;
         return { x: x_, y: y_ };
       } else {
+        const t__ = (t - t_offset) % fallTime;
         const y_ =
-          -calcDropVelocity(y, v.y, false) * t_ + (1 / 2) * a_.y * (t_ * t_);
+          -calcDropVelocity(y, v.y, false) * t__ + (1 / 2) * a_.y * (t__ * t__);
         return { x: x_, y: y_ };
       }
     } else {
@@ -145,13 +144,27 @@ export const calcVelocity = (body: IBody, t: number): Vector => {
       : true;
     if ((v.y > 0 && t < Math.abs(t_offset)) || (v.y < 0 && t < t_offset))
       return { x: v.x + a_.x * t, y: v.y + a_.y * t };
-    else if (falling) {
-      return { x: v.x + a_.x * t, y: a_.y * t_ };
-    } else
-      return {
-        x: v.x + a_.x * t,
-        y: -calcDropVelocity(y, v.y, false) + a_.y * t_,
-      };
+    if (falling) {
+      if (v.y < 0) {
+        const t__ = (t - t_offset) % fallTime;
+        return { x: v.x + a_.x * t, y: a_.y * t__ };
+      } else {
+        return { x: v.x + a_.x * t, y: a_.y * t_ };
+      }
+    } else {
+      if (v.y < 0) {
+        const t__ = (t - t_offset) % fallTime;
+        return {
+          x: v.x + a_.x * t,
+          y: -calcDropVelocity(y, v.y, false) + a_.y * t__,
+        };
+      } else {
+        return {
+          x: v.x + a_.x * t,
+          y: -calcDropVelocity(y, v.y, false) + a_.y * t_,
+        };
+      }
+    }
   }
   return { x: 0, y: 0 };
 };
@@ -170,7 +183,7 @@ export const getPE = (m: number, h: number): number => {
 export const getPositionData = (body: IBody, chartMode: "X" | "Y") => {
   const data: Vector[] = [];
   if (body instanceof Rectangle) {
-    for (let i = 0; i < 15; i += 0.01) {
+    for (let i = 0; i < 15; i += 0.02) {
       const pos = calcPosition(body, i);
       data.push({ x: i, y: chartMode === "X" ? pos.x : pos.y });
     }
@@ -185,7 +198,7 @@ export const getEnergyData = (
 ) => {
   const data: Vector[] = [];
   if (body instanceof Rectangle) {
-    for (let i = 0; i < 15; i += 0.01) {
+    for (let i = 0; i < 15; i += 0.02) {
       const { m } = body.originalParams;
       data.push({
         x: i,

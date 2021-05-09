@@ -35,9 +35,7 @@ const Button = styled.button`
 `;
 
 const GoBack = styled.div`
-  position: absolute;
-  top: 2rem;
-  left: 2rem;
+  text-align: center;
 `;
 
 const CalculatorContainer: React.FC<CalculatorContainerProps> = ({

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { InputType } from "./Calculator";
 import { v4 as uuidv4 } from "uuid";
@@ -7,7 +7,6 @@ type InputProps = {
   className?: string;
   inputType: InputType;
   onChange: (inputType: InputType, value: number) => void;
-  value: number;
 };
 
 const getUnit = (inputType: InputType) => {
@@ -36,14 +35,12 @@ const Unit = styled.label`
   text-align: left;
 `;
 
-const Input: React.FC<InputProps> = ({
-  className,
-  inputType,
-  onChange,
-  value,
-}) => {
+const Input: React.FC<InputProps> = ({ className, inputType, onChange }) => {
   const id = `input-${uuidv4()}`;
-
+  const [val, setVal] = useState("0");
+  useEffect(() => {
+    setVal("0");
+  }, [inputType]);
   return (
     <div className={className}>
       <div className={className}>
@@ -53,12 +50,15 @@ const Input: React.FC<InputProps> = ({
           </label>
           <input
             id={id}
-            type="number"
-            step={0.1}
+            type="text"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              onChange(inputType, parseFloat(e.target.value));
+              if (!isNaN(parseFloat(e.target.value))) {
+                console.log(e.target.value);
+                onChange(inputType, parseFloat(e.target.value));
+              }
+              setVal(e.target.value);
             }}
-            value={value}
+            value={val}
             required
           />
           <Unit htmlFor={id}>{getUnit(inputType)}</Unit>
@@ -77,7 +77,7 @@ export default styled(Input)`
     justify-content: center;
     align-items: center;
     input {
-      width: 100%;
+      width: 300px;
       height: 100%;
       padding: 0.25rem 2rem 0.25rem 0.5rem;
     }

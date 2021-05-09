@@ -18,7 +18,7 @@ const inputsInitialState = {
   y: 0,
   w: 0,
   h: 0,
-  m: 1,
+  m: 0,
   v_x: 0,
   v_y: 0,
   a_x: 0,
@@ -31,8 +31,8 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
     inputsInitialState
   );
   const [bodies, setBodies] = useState<IBody[]>([]);
-  const [applyGround, setApplyGround] = useState(true);
-  const [applyGravity, setApplyGravity] = useState(true);
+  // const [applyGround, setApplyGround] = useState(true);
+  // const [applyGravity, setApplyGravity] = useState(true);
   const dispatch = useDispatch();
   const coordinates: ParamType[] = ["x", "y", "w", "h"];
   const constants: ParamType[] = ["m"];
@@ -61,21 +61,22 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
   const onEraseAll = () => {
     CanvasStore.eraseAll();
     dispatch(removeBody());
+    setBodies([]);
   };
   const onReset = () => {
     CanvasStore.reset();
     setAnimating(false);
   };
-  const onGround = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
-    const checkbox = e.target as HTMLInputElement;
-    setApplyGround(checkbox.checked);
-    CanvasStore.setGround(checkbox.checked);
-  };
-  const onGravity = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
-    const checkbox = e.target as HTMLInputElement;
-    setApplyGravity(checkbox.checked);
-    CanvasStore.setGravity(checkbox.checked);
-  };
+  // const onGround = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+  //   const checkbox = e.target as HTMLInputElement;
+  //   setApplyGround(checkbox.checked);
+  //   CanvasStore.setGround(checkbox.checked);
+  // };
+  // const onGravity = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+  //   const checkbox = e.target as HTMLInputElement;
+  //   setApplyGravity(checkbox.checked);
+  //   CanvasStore.setGravity(checkbox.checked);
+  // };
   useEffect(() => {}, []);
   return (
     <div className={className}>
@@ -83,12 +84,7 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
         <h3 className="container-header">Coordinates</h3>
         <div className="inputs-container grid">
           {coordinates.map((paramType: ParamType, index: number) => (
-            <Input
-              paramType={paramType}
-              onChange={onChange}
-              value={inputs[paramType]}
-              key={index}
-            />
+            <Input paramType={paramType} onChange={onChange} key={index} />
           ))}
         </div>
       </div>
@@ -96,12 +92,7 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
         <h3 className="container-header">Constants</h3>
         <div className="inputs-container grid">
           {constants.map((paramType: ParamType, index: number) => (
-            <Input
-              paramType={paramType}
-              onChange={onChange}
-              value={inputs[paramType]}
-              key={index}
-            />
+            <Input paramType={paramType} onChange={onChange} key={index} />
           ))}
         </div>
       </div>
@@ -109,12 +100,7 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
         <h3 className="container-header">Vectors</h3>
         <div className="inputs-container grid">
           {vectors.map((paramType: ParamType, index: number) => (
-            <Input
-              paramType={paramType}
-              onChange={onChange}
-              value={inputs[paramType]}
-              key={index}
-            />
+            <Input paramType={paramType} onChange={onChange} key={index} />
           ))}
         </div>
       </div>
@@ -132,7 +118,7 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
           {animating ? "Reset" : "Animate"}
         </button>
       </div>
-      <form className="settings-container">
+      {/* <form className="settings-container">
         <div className="checkbox-container">
           <label htmlFor="ground">Enable Ground?</label>
           <input
@@ -155,7 +141,7 @@ const ToolsContainer: React.FC<ToolsContainerProps> = ({ className }) => {
             onClick={onGravity}
           />
         </div>
-      </form>
+      </form> */}
       <div className="keys-container">
         <h3 className="container-header">Plot</h3>
         <h4>Select the color to plot the graph</h4>

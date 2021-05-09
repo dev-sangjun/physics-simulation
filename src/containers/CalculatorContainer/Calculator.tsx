@@ -28,7 +28,7 @@ export type InputType = "x" | "y" | "m" | "v_x" | "v_y" | "a_x" | "a_y" | "t";
 const inputsInitialState = {
   x: 0,
   y: 0,
-  m: 1,
+  m: 0,
   v_x: 0,
   v_y: 0,
   a_x: 0,
@@ -42,7 +42,7 @@ const Title = styled.h3`
 `;
 
 const CalculateButton = styled.button`
-  width: 20rem;
+  width: 8rem;
   height: 2rem;
   margin: auto;
   margin-bottom: 1rem;
@@ -70,14 +70,7 @@ const Calculator: React.FC<CalculatorProps> = ({
   };
 
   const getInput = (inputType: InputType, key: number) => {
-    return (
-      <Input
-        key={key}
-        inputType={inputType}
-        onChange={onChange}
-        value={inputParams[inputType]}
-      />
-    );
+    return <Input key={key} inputType={inputType} onChange={onChange} />;
   };
 
   const calculatorData: Record<CalculatorType, InputType[]> = {
@@ -95,10 +88,16 @@ const Calculator: React.FC<CalculatorProps> = ({
     const a = { x: a_x, y: a_y };
     switch (calculatorType) {
       case "Position":
-        setResult(`${calcPosition(p, v, a, t)} (m)`);
+        setResult(
+          `x: ${calcPosition(p, v, a, t).x}, y: ${
+            calcPosition(p, v, a, t).y
+          } (m)`
+        );
         break;
       case "Velocity":
-        setResult(`${calcVelocity(v, a, t)} (m/s)`);
+        setResult(
+          `x: ${calcVelocity(v, a, t).x}, y: ${calcVelocity(v, a, t).y} (m/s)`
+        );
         break;
       case "Free Fall":
         const time = calcFreeFallTime(y);
@@ -153,6 +152,7 @@ export default styled(Calculator)`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 1rem;
   .inputs {
     display: flex;
     flex-direction: column;

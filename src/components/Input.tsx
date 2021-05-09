@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { ParamType } from "../classes/utils/types";
 import { v4 as uuidv4 } from "uuid";
@@ -7,16 +7,11 @@ type InputProps = {
   className?: string;
   paramType: ParamType;
   onChange: (paramType: ParamType, value: number) => void;
-  value: number;
 };
 
-const Input: React.FC<InputProps> = ({
-  className,
-  paramType,
-  onChange,
-  value,
-}) => {
+const Input: React.FC<InputProps> = ({ className, paramType, onChange }) => {
   const id = `input-${uuidv4()}`;
+  const [val, setVal] = useState("0");
   return (
     <div className={className}>
       <div className="input-container">
@@ -25,9 +20,12 @@ const Input: React.FC<InputProps> = ({
           type="number"
           step={0.1}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            onChange(paramType, parseFloat(e.target.value));
+            if (!isNaN(parseFloat(e.target.value))) {
+              onChange(paramType, parseFloat(e.target.value));
+            }
+            setVal(e.target.value);
           }}
-          value={value}
+          value={val}
           required
         />
         <label htmlFor={id}>{paramType}</label>
